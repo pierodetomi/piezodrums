@@ -23,7 +23,6 @@ namespace PieroDeTomi.EDrums.Managers
 
         public void SendNote(MidiNote note, int velocity)
         {
-            // var noteOnEvent = new NoteOnEvent(0, _channel, (int)note, velocity, 0);
             _noteEvent.NoteNumber = (int)note;
             _noteEvent.Velocity = velocity;
 
