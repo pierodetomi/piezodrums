@@ -10,7 +10,7 @@ namespace PieroDeTomi.EDrums.Managers
 
         private readonly string _asioDriverName;
 
-        private List<ChannelManager> _channelManagers = new();
+        private List<InputChannelManager> _inputChannelManagers = new();
         
         public AudioDeviceManager(string deviceSearchKey, int sampleRate, float maxImpulseValue)
         {
@@ -22,13 +22,17 @@ namespace PieroDeTomi.EDrums.Managers
         public void BindInputChannel(int inputChannel, Action<int> midiCallback)
         {
             var channelIndex = inputChannel - 1; // Channels are 0-indexed!
-            _channelManagers.Add(new ChannelManager(channelIndex, _sampleRate, _asioDriverName, midiCallback, _maxWaveImpulseValue));
+            _inputChannelManagers.Add(new InputChannelManager(channelIndex, _sampleRate, _asioDriverName, midiCallback, _maxWaveImpulseValue));
         }
 
         public void Dispose()
         {
-            try { _channelManagers.ForEach(_ => _.Dispose()); } catch { }
-            _channelManagers.Clear();
+            _inputChannelManagers.ForEach(_ =>
+            {
+                try { _.Dispose(); } catch { }
+            });
+
+            _inputChannelManagers.Clear();
         }
 
         private string FindAsioDriverName(string searchKeyword)

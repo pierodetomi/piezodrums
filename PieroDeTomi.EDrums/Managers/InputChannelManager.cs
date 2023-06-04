@@ -4,10 +4,8 @@ using PieroDeTomi.EDrums.Utilities;
 
 namespace PieroDeTomi.EDrums.Managers
 {
-    public class ChannelManager : IDisposable
+    public class InputChannelManager : IDisposable
     {
-        private const int COOLDOWN_PERIOD_MS = 10;
-
         private readonly int _channelIndex;
 
         private readonly string _asioDriverName;
@@ -22,11 +20,9 @@ namespace PieroDeTomi.EDrums.Managers
         
         private int _lastVelocity;
 
-        private long _lastNoteTimestamp;
-        
         private Debouncer _debouncer;
 
-        public ChannelManager(int channelIndex, int sampleRate, string asioDriverName, Action<int> midiCallback, float maxWaveImpulseValue)
+        public InputChannelManager(int channelIndex, int sampleRate, string asioDriverName, Action<int> midiCallback, float maxWaveImpulseValue)
         {
             _channelIndex = channelIndex;
             _asioDriverName = asioDriverName;
@@ -57,17 +53,7 @@ namespace PieroDeTomi.EDrums.Managers
             var velocity = waveValue.ToVelocity(_maxWaveImpulseValue);
 
             if (waveValue.IsAudible && velocity > _lastVelocity)
-            {
-                var timestamp = DateTime.Now.Ticks / 10000;
-                var delta = timestamp - _lastNoteTimestamp;
-
-                if (delta > COOLDOWN_PERIOD_MS)
-                {
-                    // System.Media.SystemSounds.Exclamation.Play();
-                    _midiCallback(velocity);
-                    _lastNoteTimestamp = timestamp;
-                }
-            }
+                _midiCallback(velocity);
             //_debouncer.DebounceIf(
             //    () => _lastVelocity > velocity,
             //    () =>
