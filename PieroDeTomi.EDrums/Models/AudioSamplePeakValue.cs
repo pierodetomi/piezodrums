@@ -1,6 +1,6 @@
 ﻿namespace PieroDeTomi.EDrums.Models
 {
-    public struct WaveValue
+    public struct AudioSamplePeakValue
     {
         public float UnderlyingValue { get; private set; }
 
@@ -8,7 +8,7 @@
 
         public bool IsAudible => Math.Round(UnderlyingValue, 2) > 0;
 
-        public WaveValue(float underlyingValue)
+        public AudioSamplePeakValue(float underlyingValue)
         {
             UnderlyingValue = underlyingValue;
         }

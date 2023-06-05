@@ -4,24 +4,24 @@ namespace PieroDeTomi.EDrums.Utilities
 {
     public class WaveformAnalyzer
     {
-        private List<WaveValue> _samplesQueue = new();
+        private readonly List<AudioSamplePeakValue> _samplePeaksQueue = new();
 
         private bool _isInsideWave = false;
 
-        private Action<WaveValue> _onPeakDetected;
+        private Action<AudioSamplePeakValue> _onWavePeakDetected;
 
-        public WaveformAnalyzer(Action<WaveValue> onPeakDetected)
+        public WaveformAnalyzer(Action<AudioSamplePeakValue> onWavePeakDetected)
         {
-            _onPeakDetected = onPeakDetected;
+            _onWavePeakDetected = onWavePeakDetected;
         }
 
-        public void AddSampleValue(WaveValue waveValue)
+        public void AddSamplePeakValue(AudioSamplePeakValue waveValue)
         {
             if (!_isInsideWave)
             {
                 if (waveValue.IsAudible)
                 {
-                    _samplesQueue.Add(waveValue);
+                    _samplePeaksQueue.Add(waveValue);
                     _isInsideWave = true;
                 }
             }
@@ -29,26 +29,26 @@ namespace PieroDeTomi.EDrums.Utilities
             {
                 if (waveValue.IsAudible)
                 {
-                    _samplesQueue.Add(waveValue);
+                    _samplePeaksQueue.Add(waveValue);
                 }
                 else
                 {
                     // Calculate wave peak
-                    var max = _samplesQueue[0];
+                    var max = _samplePeaksQueue[0];
 
-                    for (var i = 1; i < _samplesQueue.Count; i++)
+                    for (var i = 1; i < _samplePeaksQueue.Count; i++)
                     {
-                        var sampleValue = _samplesQueue[i];
+                        var sampleValue = _samplePeaksQueue[i];
                         
                         if (sampleValue.NormalizedValue > max.NormalizedValue)
                             max = sampleValue;
                     }
 
-                    // Emit peak
-                    _onPeakDetected(max);
+                    // Emit wave peak value
+                    _onWavePeakDetected(max);
 
                     // Clear state
-                    _samplesQueue.Clear();
+                    _samplePeaksQueue.Clear();
                     _isInsideWave = false;
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using PieroDeTomi.EDrums.Models;
+using PieroDeTomi.EDrums.Models.Configuration;
 using PieroDeTomi.EDrums.Utilities;
 
 namespace PieroDeTomi.EDrums.Managers
@@ -14,46 +15,30 @@ namespace PieroDeTomi.EDrums.Managers
 
         private readonly Action<int> _midiCallback;
 
-        private readonly float _maxWaveImpulseValue;
+        private readonly DrumModuleConfiguration _configuration;
 
         private float[] _samples;
         
-        private int _lastVelocity;
-
-        private DateTime _lastPlayedNote = DateTime.MinValue;
-
-        private Debouncer _debouncer;
-
-        private PeaksQueue _peaksQueue;
-
         private WaveformAnalyzer _waveformAnalyzer;
 
-        public InputChannelManager(int channelIndex, int sampleRate, string asioDriverName, Action<int> midiCallback, float maxWaveImpulseValue)
+        public InputChannelManager(int channelIndex, string asioDriverName, Action<int> midiCallback, DrumModuleConfiguration configuration)
         {
             _channelIndex = channelIndex;
             _asioDriverName = asioDriverName;
             _midiCallback = midiCallback;
-            _maxWaveImpulseValue = maxWaveImpulseValue;
+            _configuration = configuration;
 
             _asioOut = new AsioOut(_asioDriverName) { InputChannelOffset = channelIndex };
-            _asioOut.InitRecordAndPlayback(null, 1, sampleRate);
+            _asioOut.InitRecordAndPlayback(null, 1, _configuration.SampleRate);
             _asioOut.AudioAvailable += OnAudioAvailable;
 
             _asioOut.Play(); // start recording
 
             _samples = new float[_asioOut.FramesPerBuffer];
-            _lastVelocity = 0;
-            _debouncer = new Debouncer(5);
-
-            _peaksQueue = new PeaksQueue(peak =>
-            {
-                var velocity = peak.ToVelocity(_maxWaveImpulseValue);
-                _midiCallback(velocity);
-            });
 
             _waveformAnalyzer = new WaveformAnalyzer(peak =>
             {
-                var velocity = peak.ToVelocity(_maxWaveImpulseValue);
+                var velocity = peak.ToVelocity(_configuration.MaxWaveImpulseValue);
                 _midiCallback(velocity);
             });
         }
@@ -67,22 +52,11 @@ namespace PieroDeTomi.EDrums.Managers
         {
             e.GetAsInterleavedSamples(_samples);
 
-            var waveValue = GetWaveValue();
-            // var velocity = waveValue.ToVelocity(_maxWaveImpulseValue);
-
-            //if (waveValue.IsAudible && velocity > _lastVelocity)
-            //{
-            //    _peaksQueue.Add(waveValue);
-            //    // _midiCallback(velocity);
-            //    // System.Console.WriteLine($"Delta time: {delta}ms");
-            //}
-
-            _waveformAnalyzer.AddSampleValue(waveValue);
-
-            // _lastVelocity = velocity;
+            var samplePeakValue = GetSamplePeakValue();
+            _waveformAnalyzer.AddSamplePeakValue(samplePeakValue);
         }
 
-        private WaveValue GetWaveValue()
+        private AudioSamplePeakValue GetSamplePeakValue()
         {
             var max = 0f;
 
@@ -107,7 +81,7 @@ namespace PieroDeTomi.EDrums.Managers
                 if (sample4 > max) max = sample4;
             }
 
-            return new WaveValue(max);
+            return new AudioSamplePeakValue(max);
         }
     }
 }

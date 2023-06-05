@@ -26,7 +26,7 @@ namespace PieroDeTomi.EDrums.Managers
         public void BindInputChannel(int inputChannel, Action<int> midiCallback)
         {
             var channelIndex = inputChannel - 1; // Channels are 0-indexed!
-            _inputChannelManagers.Add(new InputChannelManager(channelIndex, _configuration.SampleRate, _asioDriverName, midiCallback, _configuration.MaxWaveImpulseValue));
+            _inputChannelManagers.Add(new InputChannelManager(channelIndex, _asioDriverName, midiCallback, _configuration));
         }
 
         public override void Dispose()
