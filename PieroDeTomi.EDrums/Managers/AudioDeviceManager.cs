@@ -1,31 +1,35 @@
 ﻿using NAudio.Wave;
+using PieroDeTomi.EDrums.Models.Configuration;
 
 namespace PieroDeTomi.EDrums.Managers
 {
-    public class AudioDeviceManager : IDisposable
+    public class AudioDeviceManager : ManagerBase
     {
-        private readonly int _sampleRate;
-
-        private readonly float _maxWaveImpulseValue;
+        private readonly DrumModuleConfiguration _configuration;
 
         private readonly string _asioDriverName;
 
         private List<InputChannelManager> _inputChannelManagers = new();
         
-        public AudioDeviceManager(string deviceSearchKey, int sampleRate, float maxImpulseValue)
+        public AudioDeviceManager(DrumModuleConfiguration configuration)
         {
-            _sampleRate = sampleRate;
-            _maxWaveImpulseValue = maxImpulseValue;
-            _asioDriverName = FindAsioDriverName(deviceSearchKey);
+            _configuration = configuration;
+            _asioDriverName = FindAsioDriverName(configuration.AudioDeviceSearchKey);
+
+            if (string.IsNullOrEmpty(_asioDriverName))
+            {
+                LogError($"Unable to find input audio device (looking for key \"{configuration.AudioDeviceSearchKey}\")", true);
+                Environment.Exit(-1);
+            }
         }
 
         public void BindInputChannel(int inputChannel, Action<int> midiCallback)
         {
             var channelIndex = inputChannel - 1; // Channels are 0-indexed!
-            _inputChannelManagers.Add(new InputChannelManager(channelIndex, _sampleRate, _asioDriverName, midiCallback, _maxWaveImpulseValue));
+            _inputChannelManagers.Add(new InputChannelManager(channelIndex, _configuration.SampleRate, _asioDriverName, midiCallback, _configuration.MaxWaveImpulseValue));
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             _inputChannelManagers.ForEach(_ =>
             {

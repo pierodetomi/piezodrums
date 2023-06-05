@@ -4,7 +4,7 @@ using PieroDeTomi.EDrums.Utilities;
 
 namespace PieroDeTomi.EDrums.Managers
 {
-    public class InputChannelManager : IDisposable
+    public class InputChannelManager : ManagerBase
     {
         private readonly int _channelIndex;
 
@@ -20,7 +20,13 @@ namespace PieroDeTomi.EDrums.Managers
         
         private int _lastVelocity;
 
+        private DateTime _lastPlayedNote = DateTime.MinValue;
+
         private Debouncer _debouncer;
+
+        private PeaksQueue _peaksQueue;
+
+        private WaveformAnalyzer _waveformAnalyzer;
 
         public InputChannelManager(int channelIndex, int sampleRate, string asioDriverName, Action<int> midiCallback, float maxWaveImpulseValue)
         {
@@ -38,9 +44,21 @@ namespace PieroDeTomi.EDrums.Managers
             _samples = new float[_asioOut.FramesPerBuffer];
             _lastVelocity = 0;
             _debouncer = new Debouncer(5);
+
+            _peaksQueue = new PeaksQueue(peak =>
+            {
+                var velocity = peak.ToVelocity(_maxWaveImpulseValue);
+                _midiCallback(velocity);
+            });
+
+            _waveformAnalyzer = new WaveformAnalyzer(peak =>
+            {
+                var velocity = peak.ToVelocity(_maxWaveImpulseValue);
+                _midiCallback(velocity);
+            });
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             try { _asioOut.Dispose(); } catch { }
         }
@@ -50,19 +68,18 @@ namespace PieroDeTomi.EDrums.Managers
             e.GetAsInterleavedSamples(_samples);
 
             var waveValue = GetWaveValue();
-            var velocity = waveValue.ToVelocity(_maxWaveImpulseValue);
+            // var velocity = waveValue.ToVelocity(_maxWaveImpulseValue);
 
-            if (waveValue.IsAudible && velocity > _lastVelocity)
-                _midiCallback(velocity);
-            //_debouncer.DebounceIf(
-            //    () => _lastVelocity > velocity,
-            //    () =>
-            //    {
-            //        _midiCallback(velocity);
-            //        return Task.CompletedTask;
-            //    });
+            //if (waveValue.IsAudible && velocity > _lastVelocity)
+            //{
+            //    _peaksQueue.Add(waveValue);
+            //    // _midiCallback(velocity);
+            //    // System.Console.WriteLine($"Delta time: {delta}ms");
+            //}
 
-            _lastVelocity = velocity;
+            _waveformAnalyzer.AddSampleValue(waveValue);
+
+            // _lastVelocity = velocity;
         }
 
         private WaveValue GetWaveValue()

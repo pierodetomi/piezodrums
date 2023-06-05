@@ -1,30 +1,34 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using PieroDeTomi.EDrums.Models.Configuration;
+using System.Diagnostics;
 
 namespace PieroDeTomi.EDrums.Console
 {
     public class Program
     {
-        private static EDrums eDrums;
+        private static EDrums _eDrums;
 
         [STAThread]
-        public static void Main()
+        public static void Main(string[] args)
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
 
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
-            eDrums = new EDrums(
-                midiVirtualDeviceName: "PDT eDrums",
-                audioDeviceSearchKey: "Focusrite USB",
-                audioDeviceSampleRate: 192000, // 44100,
-                maxWaveImpulseValue: 1.5f);
+            using IHost host = Host.CreateDefaultBuilder(args).Build();
+            var config = host.Services.GetService<IConfiguration>();
 
-            System.Console.ReadLine();
+            var drumModuleConfiguration = config.GetRequiredSection("DrumModule").Get<DrumModuleConfiguration>();
+            _eDrums = new EDrums(drumModuleConfiguration);
+
+            host.Run();
         }
 
         private static void OnProcessExit(object sender, EventArgs e)
         {
-            eDrums.Dispose();
+            _eDrums?.Dispose();
         }
     }
 }

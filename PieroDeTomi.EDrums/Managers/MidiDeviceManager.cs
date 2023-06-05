@@ -1,11 +1,11 @@
 ﻿using NAudio.Midi;
-using PieroDeTomi.EDrums.Models;
+using PieroDeTomi.EDrums.Models.Configuration;
 
 namespace PieroDeTomi.EDrums.Managers
 {
-    public class MidiVirtualDeviceManager : IDisposable
+    public class MidiDeviceManager : ManagerBase
     {
-        private readonly int _channel;
+        private readonly DrumModuleConfiguration _configuration;
 
         private int _deviceIndex = -1;
 
@@ -13,23 +13,23 @@ namespace PieroDeTomi.EDrums.Managers
 
         private NoteOnEvent _noteEvent = null;
 
-        public MidiVirtualDeviceManager(string deviceName, int channel)
+        public MidiDeviceManager(DrumModuleConfiguration configuration)
         {
-            _channel = channel;
-            _noteEvent = new NoteOnEvent(0, _channel, 0, 0, 0);
+            _configuration = configuration;
+            _noteEvent = new NoteOnEvent(0, _configuration.Midi.Channel, 0, 0, 0);
 
-            InitializeMidiDevice(deviceName);
+            InitializeMidiDevice(_configuration.Midi.DeviceName);
         }
 
-        public void SendNote(MidiNote note, int velocity)
+        public void SendNote(int note, int velocity)
         {
-            _noteEvent.NoteNumber = (int)note;
+            _noteEvent.NoteNumber = note;
             _noteEvent.Velocity = velocity;
 
             _midiOut.Send(_noteEvent.GetAsShortMessage());
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             try { _midiOut.Dispose(); }
             catch { }
