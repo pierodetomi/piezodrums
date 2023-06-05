@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PieroDeTomi.EDrums.Models.Configuration;
+using PiezoDrums.Models.Configuration;
 using System.Diagnostics;
 
-namespace PieroDeTomi.EDrums.Console
+namespace PiezoDrums.Console
 {
     public class Program
     {

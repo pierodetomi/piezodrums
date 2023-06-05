@@ -1,9 +1,9 @@
 ﻿using NAudio.Wave;
-using PieroDeTomi.EDrums.Models;
-using PieroDeTomi.EDrums.Models.Configuration;
-using PieroDeTomi.EDrums.Utilities;
+using PiezoDrums.Models;
+using PiezoDrums.Models.Configuration;
+using PiezoDrums.Utilities;
 
-namespace PieroDeTomi.EDrums.Managers
+namespace PiezoDrums.Managers
 {
     public class InputChannelManager : ManagerBase
     {

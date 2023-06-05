@@ -1,4 +1,4 @@
-﻿namespace PieroDeTomi.EDrums.Models
+﻿namespace PiezoDrums.Models
 {
     public struct AudioSamplePeakValue
     {

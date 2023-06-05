@@ -1,7 +1,7 @@
 ﻿using NAudio.Midi;
-using PieroDeTomi.EDrums.Models.Configuration;
+using PiezoDrums.Models.Configuration;
 
-namespace PieroDeTomi.EDrums.Managers
+namespace PiezoDrums.Managers
 {
     public class MidiDeviceManager : ManagerBase
     {

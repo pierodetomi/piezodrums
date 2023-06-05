@@ -1,6 +1,6 @@
-﻿using PieroDeTomi.EDrums.Models;
+﻿using PiezoDrums.Models;
 
-namespace PieroDeTomi.EDrums.Utilities
+namespace PiezoDrums.Utilities
 {
     public class WaveformAnalyzer
     {

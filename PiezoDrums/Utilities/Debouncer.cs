@@ -1,4 +1,4 @@
-﻿namespace PieroDeTomi.EDrums.Utilities
+﻿namespace PiezoDrums.Utilities
 {
     public class Debouncer
     {

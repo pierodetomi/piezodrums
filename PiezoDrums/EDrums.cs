@@ -1,7 +1,7 @@
-﻿using PieroDeTomi.EDrums.Managers;
-using PieroDeTomi.EDrums.Models.Configuration;
+﻿using PiezoDrums.Managers;
+using PiezoDrums.Models.Configuration;
 
-namespace PieroDeTomi.EDrums.Console
+namespace PiezoDrums.Console
 {
     public class EDrums : IDisposable
     {

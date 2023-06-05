@@ -1,4 +1,4 @@
-﻿namespace PieroDeTomi.EDrums.Managers
+﻿namespace PiezoDrums.Managers
 {
     public abstract class ManagerBase : IDisposable
     {

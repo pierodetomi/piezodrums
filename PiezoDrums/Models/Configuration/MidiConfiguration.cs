@@ -1,4 +1,4 @@
-﻿namespace PieroDeTomi.EDrums.Models.Configuration
+﻿namespace PiezoDrums.Models.Configuration
 {
     public class MidiConfiguration
     {
