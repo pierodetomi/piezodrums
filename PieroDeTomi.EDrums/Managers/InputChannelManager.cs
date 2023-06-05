@@ -45,7 +45,7 @@ namespace PieroDeTomi.EDrums.Managers
 
         public override void Dispose()
         {
-            try { _asioOut.Dispose(); } catch { }
+            try { _asioOut?.Dispose(); } catch { }
         }
 
         private void OnAudioAvailable(object sender, AsioAudioAvailableEventArgs e)
