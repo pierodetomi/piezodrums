@@ -37,7 +37,7 @@ namespace PiezoDrums.Console
             _audioDevice.BindInputChannel(mapping.Channel, velocity =>
             {
                 _midiDevice.SendNote(mapping.MidiNote, velocity);
-                System.Console.WriteLine($"Note {mapping.MidiNote} > {velocity}");
+                System.Console.WriteLine($"NOTE: {mapping.MidiNote} - VELOCITY: {velocity}");
             });
         }
     }
