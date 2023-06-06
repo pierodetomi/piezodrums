@@ -1,5 +1,6 @@
 ﻿using NAudio.Midi;
 using PiezoDrums.Models.Configuration;
+using Sanford.Multimedia.Midi;
 
 namespace PiezoDrums.Managers
 {
@@ -9,7 +10,7 @@ namespace PiezoDrums.Managers
 
         private int _deviceIndex = -1;
 
-        private MidiOut _midiOut = null;
+        private OutputDevice _midiOut = null;
 
         private NoteOnEvent _noteEvent = null;
 
@@ -26,7 +27,7 @@ namespace PiezoDrums.Managers
             _noteEvent.NoteNumber = note;
             _noteEvent.Velocity = velocity;
 
-            _midiOut.Send(_noteEvent.GetAsShortMessage());
+            _midiOut.SendShort(_noteEvent.GetAsShortMessage());
         }
 
         public override void Dispose()
@@ -39,10 +40,10 @@ namespace PiezoDrums.Managers
         {
             for (int device = 0; device < MidiOut.NumberOfDevices; device++)
             {
-                if (MidiOut.DeviceInfo(device).ProductName == deviceName)
+                if (MidiOut.DeviceInfo(device).ProductName.Contains(deviceName))
                 {
                     _deviceIndex = device;
-                    _midiOut = new MidiOut(_deviceIndex);
+                    _midiOut = new OutputDevice(_deviceIndex);
 
                     break;
                 }
