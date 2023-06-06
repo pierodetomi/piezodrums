@@ -60,12 +60,28 @@ namespace PiezoDrums.Utilities
         {
             var max = _samplePeaksQueue[0];
 
-            for (var i = 1; i < _samplePeaksQueue.Count; i++)
+            if (_samplePeaksQueue.Count % 2 == 0)
             {
-                var sampleValue = _samplePeaksQueue[i];
+                for (var i = 1; i < _samplePeaksQueue.Count / 2; i += 2)
+                {
+                    var sampleValue = _samplePeaksQueue[i + 0];
+                    var nextSampleValue = _samplePeaksQueue[i + 1];
 
-                if (sampleValue.NormalizedValue > max.NormalizedValue)
-                    max = sampleValue;
+                    if (sampleValue.NormalizedValue > max.NormalizedValue)
+                        max = sampleValue;
+                    if (nextSampleValue.NormalizedValue > max.NormalizedValue)
+                        max = nextSampleValue;
+                }
+            }
+            else
+            {
+                for (var i = 1; i < _samplePeaksQueue.Count; i++)
+                {
+                    var sampleValue = _samplePeaksQueue[i];
+
+                    if (sampleValue.NormalizedValue > max.NormalizedValue)
+                        max = sampleValue;
+                }
             }
 
             return max;
