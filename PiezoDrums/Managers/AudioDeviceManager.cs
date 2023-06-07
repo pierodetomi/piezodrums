@@ -1,9 +1,10 @@
 ﻿using NAudio.Wave;
+using PiezoDrums.Base;
 using PiezoDrums.Models.Configuration;
 
 namespace PiezoDrums.Managers
 {
-    public class AudioDeviceManager : ManagerBase
+    public class AudioDeviceManager : LoggingComponentBase, IDisposable
     {
         private readonly DrumModuleConfiguration _configuration;
 
@@ -29,7 +30,7 @@ namespace PiezoDrums.Managers
             _inputChannelManagers.Add(new InputChannelManager(channelIndex, _asioDriverName, midiCallback, _configuration));
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             _inputChannelManagers.ForEach(_ =>
             {

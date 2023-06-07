@@ -1,9 +1,10 @@
-﻿using PiezoDrums.Managers;
+﻿using PiezoDrums.Base;
+using PiezoDrums.Managers;
 using PiezoDrums.Models.Configuration;
 
 namespace PiezoDrums.Console
 {
-    public class EDrums : IDisposable
+    public class EDrums : LoggingComponentBase, IDisposable
     {
         private readonly DrumModuleConfiguration _configuration;
 
@@ -37,7 +38,10 @@ namespace PiezoDrums.Console
             _audioDevice.BindInputChannel(mapping.Channel, velocity =>
             {
                 _midiDevice.SendNote(mapping.MidiNote, velocity);
-                System.Console.WriteLine($"NOTE: {mapping.MidiNote} - VELOCITY: {velocity}");
+
+#if DEBUG
+                Log($"NOTE: {mapping.MidiNote} - VELOCITY: {velocity}", clearPreviousContent: false);
+#endif
             });
         }
     }

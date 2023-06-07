@@ -1,6 +1,6 @@
-﻿namespace PiezoDrums.Managers
+﻿namespace PiezoDrums.Base
 {
-    public abstract class ManagerBase : IDisposable
+    public class LoggingComponentBase
     {
         public void LogError(string message, bool clearPreviousContent = false)
         {
@@ -11,7 +11,7 @@
         {
             if (clearPreviousContent)
                 System.Console.Clear();
-            
+
             if (!color.HasValue)
             {
                 System.Console.WriteLine(message);
@@ -23,7 +23,5 @@
             System.Console.WriteLine(message);
             System.Console.ForegroundColor = colorBackup;
         }
-
-        public abstract void Dispose();
     }
 }

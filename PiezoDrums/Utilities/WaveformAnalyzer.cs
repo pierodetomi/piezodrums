@@ -1,16 +1,24 @@
-﻿using PiezoDrums.Models;
+﻿using PiezoDrums.Base;
+using PiezoDrums.Models;
+using System.Diagnostics;
 
 namespace PiezoDrums.Utilities
 {
-    public class WaveformAnalyzer
+    public class WaveformAnalyzer : LoggingComponentBase
     {
-        private readonly AudioSamplePeakValue[] _samplePeaksQueue = new AudioSamplePeakValue[10000];
-
-        private int _peaksCount = 0;
-
         private bool _isInsideWave = false;
 
+        private AudioSamplePeakValue _currentMaxPeak;
+
         private Action<AudioSamplePeakValue> _onWaveMaxPeakDetected;
+
+#if DEBUG
+        private Stopwatch _watch = new Stopwatch();
+
+        private decimal _detectedPeaks = 0;
+
+        private decimal _cumulativeElapsedTicks = 0;
+#endif
 
         public WaveformAnalyzer(Action<AudioSamplePeakValue> onWaveMaxPeakDetected)
         {
@@ -23,74 +31,43 @@ namespace PiezoDrums.Utilities
             {
                 if (samplePeak.IsAudible)
                 {
-                    _samplePeaksQueue[_peaksCount] = samplePeak;
-                    _peaksCount++;
+#if DEBUG
+                    _watch.Start();
+#endif
 
+                    _currentMaxPeak = samplePeak;
                     _isInsideWave = true;
                 }
             }
             else
             {
-                if (samplePeak.IsAudible)
+                if (samplePeak.IsAudible && samplePeak.UnderlyingValue > _currentMaxPeak.UnderlyingValue)
                 {
-                    _samplePeaksQueue[_peaksCount] = samplePeak;
-                    _peaksCount++;
+                    _currentMaxPeak = samplePeak;
                 }
                 else
                 {
-                    /*
-                     * Calculate wave peak
-                     * 
-                     * This is given by the greatest peak value between collected samples.
-                     * 
-                     */
-                    var maxPeak = GetWaveMaxPeak();
-
                     /* Emit wave MAX peak value.
                      * 
                      * For performance purposes, this callback will be executed async, to avoid blocking/slowing 
                      * the processing of future incoming samples.
                      * 
                      */
-                    Task.Run(() => _onWaveMaxPeakDetected(maxPeak));
+                    Task.Run(() => _onWaveMaxPeakDetected(_currentMaxPeak));
 
                     // Clear state
-                    _samplePeaksQueue[_peaksCount] = samplePeak;
-                    _peaksCount = 0;
                     _isInsideWave = false;
+
+#if DEBUG
+                    _watch.Stop();
+                    _detectedPeaks++;
+                    _cumulativeElapsedTicks += _watch.ElapsedTicks;
+                    var _meanElapsedTicks = _cumulativeElapsedTicks / _detectedPeaks;
+                    Log($"Mean peak detection time: {_meanElapsedTicks} ticks", ConsoleColor.Green, clearPreviousContent: true);
+                    _watch.Reset();
+#endif
                 }
             }
-        }
-
-        private AudioSamplePeakValue GetWaveMaxPeak()
-        {
-            var max = _samplePeaksQueue[0];
-
-            if (_peaksCount % 2 == 0)
-            {
-                for (var i = 1; i < _peaksCount / 2; i += 2)
-                {
-                    var sampleValue = _samplePeaksQueue[i + 0];
-                    var nextSampleValue = _samplePeaksQueue[i + 1];
-
-                    if (sampleValue.NormalizedValue > max.NormalizedValue)
-                        max = sampleValue;
-                    if (nextSampleValue.NormalizedValue > max.NormalizedValue)
-                        max = nextSampleValue;
-                }
-            }
-            else
-            {
-                for (var i = 1; i < _peaksCount; i++)
-                {
-                    var sampleValue = _samplePeaksQueue[i];
-
-                    if (sampleValue.NormalizedValue > max.NormalizedValue)
-                        max = sampleValue;
-                }
-            }
-
-            return max;
         }
     }
 }

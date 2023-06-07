@@ -1,9 +1,10 @@
 ﻿using NAudio.Midi;
+using PiezoDrums.Base;
 using PiezoDrums.Models.Configuration;
 
 namespace PiezoDrums.Managers
 {
-    public class MidiDeviceManager : ManagerBase
+    public class MidiDeviceManager : LoggingComponentBase, IDisposable
     {
         private readonly DrumModuleConfiguration _configuration;
 
@@ -29,7 +30,7 @@ namespace PiezoDrums.Managers
             _midiOut.Send(_noteEvent.GetAsShortMessage());
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             try { _midiOut.Dispose(); }
             catch { }

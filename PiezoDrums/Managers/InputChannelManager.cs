@@ -1,11 +1,12 @@
 ﻿using NAudio.Wave;
+using PiezoDrums.Base;
 using PiezoDrums.Models;
 using PiezoDrums.Models.Configuration;
 using PiezoDrums.Utilities;
 
 namespace PiezoDrums.Managers
 {
-    public class InputChannelManager : ManagerBase
+    public class InputChannelManager : LoggingComponentBase, IDisposable
     {
         private readonly int _channelIndex;
 
@@ -43,7 +44,7 @@ namespace PiezoDrums.Managers
             });
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             try { _asioOut?.Dispose(); } catch { }
         }
