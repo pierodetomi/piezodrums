@@ -4,7 +4,9 @@ namespace PiezoDrums.Utilities
 {
     public class WaveformAnalyzer
     {
-        private readonly List<AudioSamplePeakValue> _samplePeaksQueue = new();
+        private readonly AudioSamplePeakValue[] _samplePeaksQueue = new AudioSamplePeakValue[10000];
+
+        private int _peaksCount = 0;
 
         private bool _isInsideWave = false;
 
@@ -21,7 +23,9 @@ namespace PiezoDrums.Utilities
             {
                 if (samplePeak.IsAudible)
                 {
-                    _samplePeaksQueue.Add(samplePeak);
+                    _samplePeaksQueue[_peaksCount] = samplePeak;
+                    _peaksCount++;
+
                     _isInsideWave = true;
                 }
             }
@@ -29,7 +33,8 @@ namespace PiezoDrums.Utilities
             {
                 if (samplePeak.IsAudible)
                 {
-                    _samplePeaksQueue.Add(samplePeak);
+                    _samplePeaksQueue[_peaksCount] = samplePeak;
+                    _peaksCount++;
                 }
                 else
                 {
@@ -50,7 +55,8 @@ namespace PiezoDrums.Utilities
                     Task.Run(() => _onWaveMaxPeakDetected(maxPeak));
 
                     // Clear state
-                    _samplePeaksQueue.Clear();
+                    _samplePeaksQueue[_peaksCount] = samplePeak;
+                    _peaksCount = 0;
                     _isInsideWave = false;
                 }
             }
@@ -60,9 +66,9 @@ namespace PiezoDrums.Utilities
         {
             var max = _samplePeaksQueue[0];
 
-            if (_samplePeaksQueue.Count % 2 == 0)
+            if (_peaksCount % 2 == 0)
             {
-                for (var i = 1; i < _samplePeaksQueue.Count / 2; i += 2)
+                for (var i = 1; i < _peaksCount / 2; i += 2)
                 {
                     var sampleValue = _samplePeaksQueue[i + 0];
                     var nextSampleValue = _samplePeaksQueue[i + 1];
@@ -75,7 +81,7 @@ namespace PiezoDrums.Utilities
             }
             else
             {
-                for (var i = 1; i < _samplePeaksQueue.Count; i++)
+                for (var i = 1; i < _peaksCount; i++)
                 {
                     var sampleValue = _samplePeaksQueue[i];
 
