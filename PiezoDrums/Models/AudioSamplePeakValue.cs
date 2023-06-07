@@ -1,16 +1,18 @@
 ﻿namespace PiezoDrums.Models
 {
-    public struct AudioSamplePeakValue
+    public readonly record struct AudioSamplePeakValue
     {
-        public float UnderlyingValue { get; private set; }
+        public float UnderlyingValue { get; init; }
 
-        public float NormalizedValue => UnderlyingValue * 10;
+        public float NormalizedValue { get; init; }
 
-        public bool IsAudible => Math.Round(UnderlyingValue, 2) > 0;
+        public bool IsAudible { get; init; }
 
         public AudioSamplePeakValue(float underlyingValue)
         {
             UnderlyingValue = underlyingValue;
+            NormalizedValue = UnderlyingValue * 10;
+            IsAudible = Math.Round(UnderlyingValue, 2) > 0;
         }
 
         public int ToVelocity(float maxNormalizedValue)
